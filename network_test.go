@@ -85,3 +85,111 @@ func TestBasic(t *testing.T) {
 		})
 	}
 }
+
+func TestBasicReadWrite(t *testing.T) {
+	tests := []struct {
+		name    string
+		do      func(t *testing.T)
+		want    any
+		wantErr bool
+	}{
+		{
+			name: "Byte OK",
+			do: func(t *testing.T) {
+				b := &Basic{}
+				var want byte = 0x56
+				b.AddBytes(want)
+				got, err := b.PopByte()
+				require.NoError(t, err)
+				require.Equal(t, want, got)
+			},
+		},
+		{
+			name: "Byte Err",
+			do: func(t *testing.T) {
+				b := &Basic{}
+				_, err := b.PopByte()
+				require.Error(t, err)
+			},
+		},
+		{
+			name: "Uint16 OK",
+			do: func(t *testing.T) {
+				b := &Basic{}
+				var want uint16 = 0x5603
+				b.AddUint16(want)
+				got, err := b.PopUint16()
+				require.NoError(t, err)
+				require.Equal(t, want, got)
+			},
+		},
+		{
+			name: "Uint16 Err",
+			do: func(t *testing.T) {
+				b := &Basic{}
+				_, err := b.PopUint16()
+				require.Error(t, err)
+			},
+		},
+		{
+			name: "Uint32 OK",
+			do: func(t *testing.T) {
+				b := &Basic{}
+				var want uint32 = 0x5603f86a
+				b.AddUint32(want)
+				got, err := b.PopUint32()
+				require.NoError(t, err)
+				require.Equal(t, want, got)
+			},
+		},
+		{
+			name: "Uint32 Err",
+			do: func(t *testing.T) {
+				b := &Basic{}
+				_, err := b.PopUint32()
+				require.Error(t, err)
+			},
+		},
+		{
+			name: "Uint64 OK",
+			do: func(t *testing.T) {
+				b := &Basic{}
+				var want uint64 = 0x5603f86a5603f86a
+				b.AddUint64(want)
+				got, err := b.PopUint64()
+				require.NoError(t, err)
+				require.Equal(t, want, got)
+			},
+		},
+		{
+			name: "Uint64 in, Uint32+Uint32 out",
+			do: func(t *testing.T) {
+				b := &Basic{}
+				var want uint32 = 0x5603f86a
+				b.AddUint64((uint64(want) << 32) + uint64(want))
+
+				got, err := b.PopUint32()
+				require.NoError(t, err)
+				require.Equal(t, want, got)
+
+				got, err = b.PopUint32()
+				require.NoError(t, err)
+				require.Equal(t, want, got)
+
+				_, err = b.PopUint32()
+				require.Error(t, err)
+			},
+		},
+		{
+			name: "Uint64 Fail",
+			do: func(t *testing.T) {
+				b := &Basic{}
+				_, err := b.PopUint64()
+				require.Error(t, err)
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, tt.do)
+	}
+}
