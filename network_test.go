@@ -98,7 +98,7 @@ func TestBasicReadWrite(t *testing.T) {
 			do: func(t *testing.T) {
 				b := &Basic{}
 				var want byte = 0x56
-				b.AddBytes(want)
+				b.PushBytes(want)
 				got, err := b.PopByte()
 				require.NoError(t, err)
 				require.Equal(t, want, got)
@@ -117,7 +117,7 @@ func TestBasicReadWrite(t *testing.T) {
 			do: func(t *testing.T) {
 				b := &Basic{}
 				var want uint16 = 0x5603
-				b.AddUint16(want)
+				b.PushUint16(want)
 				got, err := b.PopUint16()
 				require.NoError(t, err)
 				require.Equal(t, want, got)
@@ -136,7 +136,7 @@ func TestBasicReadWrite(t *testing.T) {
 			do: func(t *testing.T) {
 				b := &Basic{}
 				var want uint32 = 0x5603f86a
-				b.AddUint32(want)
+				b.PushUint32(want)
 				got, err := b.PopUint32()
 				require.NoError(t, err)
 				require.Equal(t, want, got)
@@ -155,7 +155,7 @@ func TestBasicReadWrite(t *testing.T) {
 			do: func(t *testing.T) {
 				b := &Basic{}
 				var want uint64 = 0x5603f86a5603f86a
-				b.AddUint64(want)
+				b.PushUint64(want)
 				got, err := b.PopUint64()
 				require.NoError(t, err)
 				require.Equal(t, want, got)
@@ -166,7 +166,7 @@ func TestBasicReadWrite(t *testing.T) {
 			do: func(t *testing.T) {
 				b := &Basic{}
 				var want uint32 = 0x5603f86a
-				b.AddUint64((uint64(want) << 32) + uint64(want))
+				b.PushUint64((uint64(want) << 32) + uint64(want))
 
 				got, err := b.PopUint32()
 				require.NoError(t, err)
@@ -186,6 +186,28 @@ func TestBasicReadWrite(t *testing.T) {
 				b := &Basic{}
 				_, err := b.PopUint64()
 				require.Error(t, err)
+			},
+		},
+		{
+			name: "Float32 OK",
+			do: func(t *testing.T) {
+				b := &Basic{}
+				var want float32 = 7.265894e25
+				b.PushFloat32(want)
+				got, err := b.PopFloat32()
+				require.NoError(t, err)
+				require.Equal(t, want, got)
+			},
+		},
+		{
+			name: "Float64 OK",
+			do: func(t *testing.T) {
+				b := &Basic{}
+				var want float64 = 7.265894e25
+				b.PushFloat64(want)
+				got, err := b.PopFloat64()
+				require.NoError(t, err)
+				require.Equal(t, want, got)
 			},
 		},
 	}

@@ -10,11 +10,24 @@ var errNotEnoughData = fmt.Errorf("not enough data in payload")
 type Trame interface {
 	FromFrame(xb []byte) error
 	ToFrame() ([]byte, error)
-	AddBytes(b ...byte)
+	PushBytes(b ...byte)
+	PushUint16(v uint16)
+	PushUint32(v uint32)
+	PushUint64(v uint64)
+	PopByte() (byte, error)
+	PopUint16() (uint16, error)
+	PopUint32() (uint32, error)
+	PopUint64() (uint64, error)
 }
 
+// Basic Trame structure
+// V = Version
+// 0        1
+// |--------|--------|
+// |1VVVVVVV|Command |
+// |Payload |...     |
+// | ...             |
 type Basic struct {
-	// 1 1bit header
 	Version uint8 // version 7bit
 	Command uint8 // action 8bit
 	Payload []byte
@@ -44,25 +57,25 @@ func (basic *Basic) ToFrame() ([]byte, error) {
 	return out, nil
 }
 
-func (basic *Basic) AddBytes(b ...byte) {
+func (basic *Basic) PushBytes(b ...byte) {
 	basic.Payload = append(basic.Payload, b...)
 }
 
-func (basic *Basic) AddUint16(v uint16) {
+func (basic *Basic) PushUint16(v uint16) {
 	b1 := byte(v >> 8)
 	b2 := byte(v)
-	basic.AddBytes(b1, b2)
+	basic.PushBytes(b1, b2)
 }
 
-func (basic *Basic) AddUint32(v uint32) {
+func (basic *Basic) PushUint32(v uint32) {
 	b1 := byte(v >> 24)
 	b2 := byte(v >> 16)
 	b3 := byte(v >> 8)
 	b4 := byte(v)
-	basic.AddBytes(b1, b2, b3, b4)
+	basic.PushBytes(b1, b2, b3, b4)
 }
 
-func (basic *Basic) AddUint64(v uint64) {
+func (basic *Basic) PushUint64(v uint64) {
 	b1 := byte(v >> 56)
 	b2 := byte(v >> 48)
 	b3 := byte(v >> 40)
@@ -71,17 +84,17 @@ func (basic *Basic) AddUint64(v uint64) {
 	b6 := byte(v >> 16)
 	b7 := byte(v >> 8)
 	b8 := byte(v)
-	basic.AddBytes(b1, b2, b3, b4, b5, b6, b7, b8)
+	basic.PushBytes(b1, b2, b3, b4, b5, b6, b7, b8)
 }
 
-func (basic *Basic) AddFloat32(f float32) {
+func (basic *Basic) PushFloat32(f float32) {
 	v := math.Float32bits(f)
-	basic.AddUint32(v)
+	basic.PushUint32(v)
 }
 
-func (basic *Basic) AddFloat64(f float64) {
+func (basic *Basic) PushFloat64(f float64) {
 	v := math.Float64bits(f)
-	basic.AddUint64(v)
+	basic.PushUint64(v)
 }
 
 func (basic *Basic) PopByte() (byte, error) {
@@ -121,4 +134,22 @@ func (basic *Basic) PopUint64() (uint64, error) {
 	basic.Payload = basic.Payload[8:]
 	var out uint64 = (uint64(v[0]) << 56) + (uint64(v[1]) << 48) + (uint64(v[2]) << 40) + (uint64(v[3]) << 32) + (uint64(v[4]) << 24) + (uint64(v[5]) << 16) + (uint64(v[6]) << 8) + uint64(v[7])
 	return out, nil
+}
+
+func (basic *Basic) PopFloat32() (float32, error) {
+	v, err := basic.PopUint32()
+	if err != nil {
+		return 0, err
+	}
+	f := math.Float32frombits(v)
+	return f, nil
+}
+
+func (basic *Basic) PopFloat64() (float64, error) {
+	v, err := basic.PopUint64()
+	if err != nil {
+		return 0, err
+	}
+	f := math.Float64frombits(v)
+	return f, nil
 }
