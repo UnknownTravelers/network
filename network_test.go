@@ -19,13 +19,8 @@ func TestBasic(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "No leading 1",
-			xb:      []byte{0x00},
-			wantErr: true,
-		},
-		{
 			name: "No Payload",
-			xb:   []byte{0x80, 0x00},
+			xb:   []byte{0x00, 0x00},
 			want: fields{
 				Version: 0,
 				Command: 0,
@@ -35,7 +30,7 @@ func TestBasic(t *testing.T) {
 		},
 		{
 			name: "Version",
-			xb:   []byte{0x81, 0x00},
+			xb:   []byte{0x01, 0x00},
 			want: fields{
 				Version: 1,
 				Command: 0,
@@ -45,7 +40,7 @@ func TestBasic(t *testing.T) {
 		},
 		{
 			name: "Command",
-			xb:   []byte{0x80, 0x02},
+			xb:   []byte{0x00, 0x02},
 			want: fields{
 				Version: 0,
 				Command: 2,
@@ -55,7 +50,7 @@ func TestBasic(t *testing.T) {
 		},
 		{
 			name: "Payload",
-			xb:   []byte{0x80, 0x00, 0x00, 0x01, 0xff},
+			xb:   []byte{0x00, 0x00, 0x00, 0x01, 0xff},
 			want: fields{
 				Version: 0,
 				Command: 0,
