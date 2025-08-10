@@ -84,12 +84,24 @@ func (basic *Basic) PushFloat64(f float64) {
 }
 
 func (basic *Basic) PopByte() (byte, error) {
-	if len(basic.Payload) <= 0 {
+	if len(basic.Payload) < 1 {
 		return 0, errNotEnoughDataInPayload
 	}
 	v := basic.Payload[0]
 	basic.Payload = basic.Payload[1:]
 	return v, nil
+}
+
+func (basic *Basic) PopBytes(n int) ([]byte, error) {
+	if len(basic.Payload) < n {
+		return nil, errNotEnoughDataInPayload
+	}
+	out := make([]byte, n)
+	for i := 0; i < n; i++ {
+		out[i] = basic.Payload[i]
+	}
+	basic.Payload = basic.Payload[n:]
+	return out, nil
 }
 
 func (basic *Basic) PopUint16() (uint16, error) {

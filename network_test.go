@@ -108,6 +108,27 @@ func TestBasicReadWrite(t *testing.T) {
 			},
 		},
 		{
+			name: "Bytes OK",
+			do: func(t *testing.T) {
+				b := &Basic{}
+				var want uint32 = 0x5603f86a
+				b.PushUint32(want)
+				got, err := b.PopBytes(4)
+				require.NoError(t, err)
+				require.Equal(t, []byte{0x56, 0x03, 0xf8, 0x6a}, got)
+			},
+		},
+		{
+			name: "Bytes Err",
+			do: func(t *testing.T) {
+				b := &Basic{}
+				var want uint16 = 0x5603
+				b.PushUint16(want)
+				_, err := b.PopBytes(4)
+				require.Error(t, err)
+			},
+		},
+		{
 			name: "Uint16 OK",
 			do: func(t *testing.T) {
 				b := &Basic{}
