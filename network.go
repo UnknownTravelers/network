@@ -41,6 +41,7 @@ func (basic *Basic) FromFrame(xb []byte) error {
 	xb = xb[1:]
 	basic.Version = b & 0x7f
 
+	// TODO: way to get command & version out if using Trame
 	b = xb[0]
 	xb = xb[1:]
 	basic.Command = b
